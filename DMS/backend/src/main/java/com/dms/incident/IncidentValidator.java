@@ -18,12 +18,6 @@ public class IncidentValidator {
         "REPORTED", "IN_PROGRESS", "RESOLVED", "CLOSED"
     );
 
-    // Detect obvious test/junk inputs
-    private static final Pattern TEST_PATTERN = Pattern.compile(
-        "^(test|testing|abc|hello|hi|sample|dummy|asdf|qwerty|xxx|yyy|zzz|1234|lol|foo|bar|baz)\\b.*",
-        Pattern.CASE_INSENSITIVE
-    );
-
     // Basic phone validation (international format)
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[\\d\\s\\-()]{7,20}$");
 
@@ -50,9 +44,6 @@ public class IncidentValidator {
         }
         if (title.length() > 200) {
             throw new BadRequestException("Incident title must not exceed 200 characters");
-        }
-        if (TEST_PATTERN.matcher(title).matches()) {
-            throw new BadRequestException("Title appears to be a test submission. Please provide a real incident title.");
         }
         checkInjection(title, "title");
 
