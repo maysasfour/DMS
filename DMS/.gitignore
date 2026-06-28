@@ -1,0 +1,42 @@
+# ── Maven build output ──────────────────────────────────────────
+backend/target/
+backend/*.class
+backend/TestHash.java
+backend/TestHash2.java
+backend/add_getters.py
+backend/add_getters_better.py
+backend/split_and_expand_dtos.py
+
+# ── Secrets — NEVER commit ───────────────────────────────────────
+backend/.env
+.env
+.env.production
+.env.local
+.env.*.local
+
+# ── Logs ────────────────────────────────────────────────────────
+backend/logs/
+*.log
+
+# ── Node / Frontend ──────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# ── Uploads (user content) ───────────────────────────────────────
+backend/uploads/
+uploads/
+
+# ── IDE ──────────────────────────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+
+# ── OS ───────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db

@@ -1,0 +1,26 @@
+# ── Email Configuration ─────────────────────────────────────────────────────
+# Copy this file to application-email.properties and fill in real values.
+# NEVER commit real credentials to git.
+
+# Option A: Gmail SMTP (free for low volume)
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=YOUR_GMAIL_ADDRESS@gmail.com
+spring.mail.password=YOUR_APP_PASSWORD
+spring.mail.from=noreply@dms-maysas.duckdns.org
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.connectiontimeout=5000
+spring.mail.properties.mail.smtp.timeout=5000
+
+# How to get Gmail App Password:
+#   1. Google Account → Security → 2-Step Verification (enable it)
+#   2. Security → App passwords → Select app: Mail, device: Other → Generate
+#   3. Use the 16-char password above (not your Gmail login password)
+
+# Option B: SendGrid (recommended for production)
+# spring.sendgrid.api-key=SG.XXXXXXXXXXXXXXXXXXXX
+# spring.mail.host=smtp.sendgrid.net
+# spring.mail.port=587
+# spring.mail.username=apikey
+# spring.mail.password=SG.XXXXXXXXXXXXXXXXXXXX

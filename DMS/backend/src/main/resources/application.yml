@@ -1,0 +1,108 @@
+spring:
+  application:
+    name: dms-backend
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:dms_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+        default_schema: public
+    show-sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: false
+    out-of-order: true
+
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE:50MB}
+      max-request-size: ${MAX_REQUEST_SIZE:50MB}
+
+  security:
+    cors:
+      allowed-origins: ${FRONTEND_ORIGIN:http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:4000,http://localhost:5000,http://localhost:5173,http://localhost:5174,http://localhost:8080,http://localhost:8081,http://localhost:8082,http://localhost:9000,http://localhost:52000,http://localhost:52001,http://localhost:52002,http://localhost:52003,http://localhost:52004,http://localhost:52005}
+      allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+      allowed-headers: '*'
+      allow-credentials: true
+
+server:
+  port: ${SERVER_PORT:9090}
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    min-response-size: 1024
+  # Security headers via response
+  tomcat:
+    remoteip:
+      remote-ip-header: X-Forwarded-For
+      protocol-header: X-Forwarded-Proto
+
+jwt:
+  secret: ${JWT_SECRET:your-super-secret-jwt-key-change-this-in-production-minimum-32-characters-long}
+  expiration: ${JWT_EXPIRATION:86400000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:2592000000}
+
+logging:
+  level:
+    root: INFO
+    com.dms: DEBUG
+    org.springframework.security: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/application.log
+    max-size: 10MB
+    max-history: 10
+
+springdoc:
+  api-docs:
+    path: /v1/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    show-extensions: true
+    tags-sorter: alpha
+    operations-sorter: alpha
+  info:
+    title: Disaster Management System API
+    version: 1.0.0
+    description: RESTful API for Disaster Management System
+
+oauth:
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:}
+    client-secret: ${GOOGLE_CLIENT_SECRET:}
+  facebook:
+    app-id: ${FACEBOOK_APP_ID:}
+    app-secret: ${FACEBOOK_APP_SECRET:}
+
+app:
+  file-upload-dir: ${UPLOAD_DIR:uploads/}
+  rate-limit:
+    capacity: 100
+    refill-tokens: 100
+    refill-duration-seconds: 60
+  satellite:
+    nasa-eonet-url: https://eonet.gsfc.nasa.gov/api/v3/events
+    usgs-earthquake-url: https://earthquake.usgs.gov/fdsnws/event/1/query
