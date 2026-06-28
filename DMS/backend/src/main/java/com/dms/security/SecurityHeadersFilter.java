@@ -29,6 +29,13 @@ public class SecurityHeadersFilter extends OncePerRequestFilter {
         response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
         // Cache-Control for API responses — never cache sensitive data
         String uri = request.getRequestURI();
+
+        // Block path traversal attempts
+        if (uri.contains("../") || uri.contains("..\\") || uri.contains("%2e%2e") || uri.contains("%2E%2E")) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid request path");
+            return;
+        }
+
         if (uri.startsWith("/api/")) {
             response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
             response.setHeader("Pragma", "no-cache");
