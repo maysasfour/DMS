@@ -46,6 +46,11 @@ spring:
       allowed-headers: '*'
       allow-credentials: true
 
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=30s
+
 server:
   port: ${SERVER_PORT:9090}
   servlet:
@@ -117,12 +122,6 @@ oauth:
   facebook:
     app-id: ${FACEBOOK_APP_ID:}
     app-secret: ${FACEBOOK_APP_SECRET:}
-
-spring:
-  cache:
-    type: caffeine
-    caffeine:
-      spec: maximumSize=500,expireAfterWrite=30s
 
 app:
   file-upload-dir: ${UPLOAD_DIR:uploads/}
