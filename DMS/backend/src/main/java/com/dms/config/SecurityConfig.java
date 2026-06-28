@@ -75,6 +75,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers("/v1/api-docs/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**").permitAll()
+                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/alerts/active").permitAll()
                 // Incidents
                 .requestMatchers(HttpMethod.GET,  "/api/v1/incidents/**").authenticated()
