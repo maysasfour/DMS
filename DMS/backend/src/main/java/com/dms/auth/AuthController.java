@@ -80,6 +80,13 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("User registered successfully!", null));
     }
 
+    @Operation(summary = "Logout", description = "Invalidates the current session (client should discard the token)")
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout() {
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok(ApiResponse.success("Logged out successfully", null));
+    }
+
     @Operation(summary = "OAuth2 login", description = "Login or register via Google or Facebook ID token")
     @PostMapping("/oauth")
     public ResponseEntity<ApiResponse<AuthResponse>> oauthLogin(@Valid @RequestBody OAuthRequest request) {
