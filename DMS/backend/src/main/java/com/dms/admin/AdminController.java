@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/admin")
@@ -37,8 +38,22 @@ public class AdminController {
     @PatchMapping("/users/{id}/role")
     public ResponseEntity<ApiResponse<UserDTO>> updateUserRole(
             @PathVariable Long id,
-            @RequestParam String role) {
-        return ResponseEntity.ok(ApiResponse.success("Role updated", userService.updateUserRole(id, role)));
+            @RequestParam(required = false) String role,
+            @RequestBody(required = false) Map<String, String> body) {
+        String resolvedRole = (role != null && !role.isBlank()) ? role
+                : (body != null ? body.get("role") : null);
+        return ResponseEntity.ok(ApiResponse.success("Role updated", userService.updateUserRole(id, resolvedRole)));
+    }
+
+    @Operation(summary = "Update user role via PUT (Admin only)")
+    @PutMapping("/users/{id}/role")
+    public ResponseEntity<ApiResponse<UserDTO>> updateUserRolePut(
+            @PathVariable Long id,
+            @RequestParam(required = false) String role,
+            @RequestBody(required = false) Map<String, String> body) {
+        String resolvedRole = (role != null && !role.isBlank()) ? role
+                : (body != null ? body.get("role") : null);
+        return ResponseEntity.ok(ApiResponse.success("Role updated", userService.updateUserRole(id, resolvedRole)));
     }
 
     @Operation(summary = "Toggle user active status (Admin only)")
