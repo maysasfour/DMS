@@ -7,6 +7,7 @@ import com.dms.user.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,7 @@ public class DashboardController {
 
     @Operation(summary = "Get system statistics")
     @GetMapping("/stats")
+    @Cacheable("dashboardStats")
     public ResponseEntity<ApiResponse<DashboardDTO>> getStats() {
         DashboardDTO stats = DashboardDTO.builder()
             .totalIncidents(incidentRepository.count())

@@ -8,11 +8,13 @@ spring:
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
+      maximum-pool-size: 15
+      minimum-idle: 5
+      connection-timeout: 3000
+      idle-timeout: 300000
+      max-lifetime: 900000
+      leak-detection-threshold: 10000
+      pool-name: DmsHikariPool
 
   jpa:
     hibernate:
@@ -51,11 +53,18 @@ server:
   compression:
     enabled: true
     min-response-size: 1024
-  # Security headers via response
+    mime-types: application/json,application/xml,text/html,text/plain
+  http2:
+    enabled: true
   tomcat:
     remoteip:
       remote-ip-header: X-Forwarded-For
       protocol-header: X-Forwarded-Proto
+    threads:
+      max: 200
+      min-spare: 20
+    max-connections: 8192
+    accept-count: 100
 
 jwt:
   secret: ${JWT_SECRET:your-super-secret-jwt-key-change-this-in-production-minimum-32-characters-long}
@@ -109,11 +118,18 @@ oauth:
     app-id: ${FACEBOOK_APP_ID:}
     app-secret: ${FACEBOOK_APP_SECRET:}
 
+spring:
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=30s
+
 app:
   file-upload-dir: ${UPLOAD_DIR:uploads/}
   rate-limit:
-    capacity: 100
-    refill-tokens: 100
+    api-capacity: 200
+    auth-capacity: 20
+    public-capacity: 300
     refill-duration-seconds: 60
   satellite:
     nasa-eonet-url: https://eonet.gsfc.nasa.gov/api/v3/events

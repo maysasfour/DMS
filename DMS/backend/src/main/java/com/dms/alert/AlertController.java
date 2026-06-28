@@ -5,6 +5,8 @@ import com.dms.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,6 +48,7 @@ public class AlertController {
 
     @GetMapping("/active")
     @Operation(summary = "Get all active alerts (public)")
+    @Cacheable("activeAlerts")
     public ResponseEntity<ApiResponse<List<Alert>>> active() {
         return ResponseEntity.ok(ApiResponse.ok(alertRepository.findByStatusOrderByCreatedAtDesc("ACTIVE")));
     }
@@ -59,6 +62,7 @@ public class AlertController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = "activeAlerts", allEntries = true)
     public ResponseEntity<ApiResponse<Alert>> create(@RequestBody Alert alert) {
         Alert saved = alertRepository.save(alert);
         return ResponseEntity.status(201).body(ApiResponse.created(saved, "Alert created"));
@@ -66,6 +70,7 @@ public class AlertController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = "activeAlerts", allEntries = true)
     public ResponseEntity<ApiResponse<Alert>> update(@PathVariable Long id, @RequestBody Alert updated) {
         alertRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Alert not found: " + id));
         updated.setAlertId(id);
@@ -74,6 +79,7 @@ public class AlertController {
 
     @PatchMapping("/{id}/deactivate")
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = "activeAlerts", allEntries = true)
     public ResponseEntity<ApiResponse<Alert>> deactivate(@PathVariable Long id) {
         Alert alert = alertRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Alert not found: " + id));
@@ -83,6 +89,7 @@ public class AlertController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = "activeAlerts", allEntries = true)
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         if (!alertRepository.existsById(id)) throw new ResourceNotFoundException("Alert not found: " + id);
         alertRepository.deleteById(id);

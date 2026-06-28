@@ -21,16 +21,29 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
 
-    private Bucket newBucket() {
+    /** General authenticated API: 200 req/min */
+    private Bucket apiBucket() {
         return Bucket.builder()
-            .addLimit(Bandwidth.builder().capacity(100).refillGreedy(100, Duration.ofMinutes(1)).build())
+            .addLimit(Bandwidth.builder().capacity(200).refillGreedy(200, Duration.ofMinutes(1)).build())
             .build();
     }
 
+    /** Auth endpoints (login/register): 20 req/min — brute-force guard */
     private Bucket authBucket() {
         return Bucket.builder()
-            .addLimit(Bandwidth.builder().capacity(10).refillGreedy(10, Duration.ofMinutes(1)).build())
+            .addLimit(Bandwidth.builder().capacity(20).refillGreedy(20, Duration.ofMinutes(1)).build())
             .build();
+    }
+
+    /** Public read-only endpoints (alerts/active, shelters): 300 req/min */
+    private Bucket publicBucket() {
+        return Bucket.builder()
+            .addLimit(Bandwidth.builder().capacity(300).refillGreedy(300, Duration.ofMinutes(1)).build())
+            .build();
+    }
+
+    private static boolean isPublicEndpoint(String uri) {
+        return uri.contains("/alerts/active") || uri.contains("/actuator/health");
     }
 
     @Override
@@ -39,12 +52,19 @@ public class RateLimitFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain chain)
             throws ServletException, IOException {
 
-        String ip = getClientIp(request);
+        String ip  = getClientIp(request);
         String uri = request.getRequestURI();
 
-        String bucketKey = uri.contains("/auth/") ? "auth:" + ip : "api:" + ip;
-        Bucket bucket = buckets.computeIfAbsent(bucketKey,
-            k -> k.startsWith("auth:") ? authBucket() : newBucket());
+        String bucketKey;
+        if (uri.contains("/auth/"))       bucketKey = "auth:"   + ip;
+        else if (isPublicEndpoint(uri))   bucketKey = "public:" + ip;
+        else                              bucketKey = "api:"    + ip;
+
+        Bucket bucket = buckets.computeIfAbsent(bucketKey, k -> {
+            if (k.startsWith("auth:"))   return authBucket();
+            if (k.startsWith("public:")) return publicBucket();
+            return apiBucket();
+        });
 
         if (bucket.tryConsume(1)) {
             response.addHeader("X-RateLimit-Remaining", String.valueOf(bucket.getAvailableTokens()));

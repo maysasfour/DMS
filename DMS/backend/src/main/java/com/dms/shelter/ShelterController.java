@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +24,7 @@ public class ShelterController {
 
     @GetMapping
     @Operation(summary = "List shelters with pagination and filtering")
+    @Cacheable("shelterList")
     public ResponseEntity<ApiResponse<Page<Shelter>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -50,6 +53,7 @@ public class ShelterController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = "shelterList", allEntries = true)
     public ResponseEntity<ApiResponse<Shelter>> create(@Valid @RequestBody Shelter shelter) {
         Shelter saved = shelterRepository.save(shelter);
         return ResponseEntity.status(201).body(ApiResponse.created(saved, "Shelter created"));
@@ -57,6 +61,7 @@ public class ShelterController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = "shelterList", allEntries = true)
     public ResponseEntity<ApiResponse<Shelter>> update(@PathVariable Long id, @Valid @RequestBody Shelter updated) {
         Shelter shelter = shelterRepository.findById(id)
             .orElseThrow(() -> new com.dms.exception.ResourceNotFoundException("Shelter not found: " + id));
@@ -67,6 +72,7 @@ public class ShelterController {
 
     @PatchMapping("/{id}/capacity")
     @PreAuthorize("hasAnyRole('ADMIN','RESCUE_TEAM')")
+    @CacheEvict(value = "shelterList", allEntries = true)
     public ResponseEntity<ApiResponse<Shelter>> updateCapacity(@PathVariable Long id, @RequestParam int delta) {
         Shelter shelter = shelterRepository.findById(id)
             .orElseThrow(() -> new com.dms.exception.ResourceNotFoundException("Shelter not found: " + id));
@@ -76,6 +82,7 @@ public class ShelterController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = "shelterList", allEntries = true)
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         if (!shelterRepository.existsById(id)) throw new com.dms.exception.ResourceNotFoundException("Shelter not found: " + id);
         shelterRepository.deleteById(id);
