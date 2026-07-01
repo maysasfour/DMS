@@ -123,6 +123,10 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/dashboard", true)
                         .permitAll()
                 )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendRedirect("/login"))
+                )
                 .logout(logout -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                         .logoutSuccessUrl("/login?logout")
