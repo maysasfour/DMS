@@ -1,0 +1,7 @@
+# Uses pre-built dist (built on host to avoid OOM on t2.micro)
+FROM nginx:1.27-alpine
+WORKDIR /usr/share/nginx/html
+RUN rm -rf ./*
+COPY dist .
+EXPOSE 80 443
+CMD ["nginx", "-g", "daemon off;"]
