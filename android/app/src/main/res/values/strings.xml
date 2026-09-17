@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Disaster Management</string>
+    <string name="facebook_app_id">1675583454618546</string>
+    <string name="facebook_client_token">e21b7f873d7a93abc8e3fee922008ca1</string>
+    <string name="fb_login_protocol_scheme">fb1675583454618546</string>
+</resources>

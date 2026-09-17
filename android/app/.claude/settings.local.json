@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/HP/Downloads/GP1/DMS/**)",
+      "Bash(uipro init *)"
+    ]
+  }
+}
