@@ -64,3 +64,14 @@ client_secret*.json
 /logs/
 /*.png
 /*.zip
+
+# Web stack generated files and private configuration
+**/node_modules/
+**/target/
+**/dist/
+**/uploads/
+**/logs/
+**/.env
+**/.env.*
+!**/.env.example
+*.key

@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: dms-postgres
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in your private environment file}
+      POSTGRES_DB: ${DB_NAME:-dms_db}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - dms_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: dms-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@dms.com
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:?Set PGADMIN_PASSWORD in your private environment file}
+    ports:
+      - "127.0.0.1:5050:80"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dms-backend
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-dms_db}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in your private environment file}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in your private environment file}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost,http://localhost:3000,http://localhost:5173}
+      UPLOAD_DIR: /app/uploads/
+      SEED_ADMIN_HASH: ${SEED_ADMIN_HASH:-!DISABLED!}
+      SEED_CITIZEN_HASH: ${SEED_CITIZEN_HASH:-!DISABLED!}
+      SEED_LEGACY_ADMIN_HASH: ${SEED_LEGACY_ADMIN_HASH:-!DISABLED!}
+      SEED_LEGACY_CITIZEN_HASH: ${SEED_LEGACY_CITIZEN_HASH:-!DISABLED!}
+      SEED_PERSONAL_ADMIN_HASH: ${SEED_PERSONAL_ADMIN_HASH:-!DISABLED!}
+      SEED_PERSONAL_ADMIN_EMAIL: ${SEED_PERSONAL_ADMIN_EMAIL:-disabled@example.invalid}
+      SERVER_PORT: 9090
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      FACEBOOK_APP_ID: ${FACEBOOK_APP_ID:-}
+      FACEBOOK_APP_SECRET: ${FACEBOOK_APP_SECRET:-}
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-true}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-production}
+    ports:
+      - "127.0.0.1:9090:9090"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - dms_uploads:/app/uploads
+      - dms_logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9090/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      start_period: 90s
+      retries: 20
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+        VITE_FACEBOOK_APP_ID: ${FACEBOOK_APP_ID:-}
+    container_name: dms-frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # Mount SSL certs if you have them (Let's Encrypt)
+      # - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  dms_pgdata:
+  dms_uploads:
+  dms_logs:

@@ -1,4 +1,4 @@
-﻿# Disaster Management System
+# Disaster Management System
 
 Main Flutter application for the Disaster Management System graduation project.
 
@@ -13,7 +13,7 @@ flutter pub get
 flutter run --dart-define=API_BASE_URL=https://your-backend.example.com
 ```
 
-Set `API_BASE_URL` to your Spring Boot server. If omitted, the app uses the default URL in `lib/core/constants/api_constants.dart`. The backend is not included in this Flutter folder. The repository's older `master` branch is preserved separately.
+Set `API_BASE_URL` to your Spring Boot server. If omitted, the app uses the default URL in `lib/core/constants/api_constants.dart`. The web stack and shared Spring Boot backend are included in `DMS/`. The repository's older `master` branch is preserved separately.
 
 ## Project structure
 
@@ -53,3 +53,22 @@ Place your keystore at `android/app/dms-release.jks`, or set `storeFile` to its 
 ## Documentation
 
 The additional Markdown files record earlier design, demo, and deployment work. Some describe the previous mock-data implementation; use the current source code and this README for the API-backed application. Example accounts in older documents are demo data, not guaranteed server credentials.
+
+## Web application
+
+The `DMS/` folder contains the web graduation project from `GP1/DMS`:
+
+- `DMS/frontend/`: React 18 and Vite web application.
+- `DMS/backend/`: Spring Boot REST API and database migrations.
+- `DMS/ai-agent/`: optional Node.js incident verification service.
+- `DMS/nginx/`, `DMS/deploy/`, and Docker Compose files: deployment configuration and instructions.
+
+To run the web frontend:
+
+```sh
+cd DMS/frontend
+npm ci
+npm run dev
+```
+
+The Vite development server uses port 3000 and proxies `/api` and `/uploads` to the backend on port 9090. Run `npm run build` to generate `dist/`. See [web project documentation](DMS/README.md) for backend setup. Local environment files and private keys are excluded; use the example environment files with your own configuration.

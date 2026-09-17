@@ -1,0 +1,44 @@
+# Production profile — overrides application.yml
+# All secrets come from environment variables (never hardcoded here)
+
+spring:
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+
+  datasource:
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE:20MB}
+      max-request-size: ${MAX_REQUEST_SIZE:25MB}
+
+logging:
+  level:
+    root: WARN
+    com.dms: INFO
+    org.springframework.security: WARN
+  file:
+    name: /app/logs/application.log
+
+server:
+  forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      remote-ip-header: X-Forwarded-For
+      protocol-header: X-Forwarded-Proto
+
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:2592000000}
